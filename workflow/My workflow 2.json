@@ -1,0 +1,244 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "log-input",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "23a49ce6-1ce0-4fea-8b4f-3ae2f26c41e0",
+      "name": "Webhook",
+      "webhookId": "a929c1e0-1c6b-4708-96b9-84bf822eedab"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://6a0c-36-255-14-130.ngrok-free.app/predict-file",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "57b9222e-1419-443a-8d53-a34b7942e3f9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87d24cd4-bd04-4a21-8902-67493e6ef8ec",
+              "leftValue": "={{$json[\"anomaly_blocks_found\"]}}\n",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "564f82c1-5761-444f-91b7-dee836f70f4a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1cnW9bwkg-pXBS5JSywyMtQ261ETDj_4LzO9vUnHHF24",
+          "mode": "list",
+          "cachedResultName": "Log Failure Alerts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cnW9bwkg-pXBS5JSywyMtQ261ETDj_4LzO9vUnHHF24/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cnW9bwkg-pXBS5JSywyMtQ261ETDj_4LzO9vUnHHF24/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "probability": "={{$json[\"probability\"]}}\n",
+            "block_id": "={{$json[\"block_id\"]}}\n",
+            "Timestamp": "={{new Date().toISOString()}}",
+            "risk": "={{$json[\"block_id\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "block_id",
+              "displayName": "block_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "probability",
+              "displayName": "probability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk",
+              "displayName": "risk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "dcd8c719-b2f4-47f7-8c0b-3e60b3216704",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VkKVeXAsBkYfteaS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "anomaly_blocks",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        768,
+        48
+      ],
+      "id": "d099273c-7fca-46f5-970b-696ac8f6ed1e",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "0fc05e45-cef4-475f-86be-431c97cd44bd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dcb90185fe60ef7df7c198db71688182614c2723c45a87b651883fc7e873980b"
+  },
+  "id": "ZUKp4FlAZ-AjXeptbc0qq",
+  "tags": []
+}
